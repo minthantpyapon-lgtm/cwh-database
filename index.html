@@ -3,66 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CWH Database - Full Text Visible</title>
+    <title>CWH Database - Filter Included</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #1f2937; --accent: #2563eb; --bg: #f3f4f6; --border-color: #d1d5db; --success: #db2777; }
+        :root { --primary: #1f2937; --accent: #2563eb; --bg: #f3f4f6; --border-color: #d1d5db; --success: #db2777; --save-color: #059669; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 5px; }
         
-        .container { 
-            background: white; padding: 10px; border-radius: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            width: fit-content; min-width: 100%; margin: auto;
-        }
-        
+        .container { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: fit-content; min-width: 100%; margin: auto; }
         .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px; }
         h2 { color: var(--primary); font-size: 1.1rem; margin: 0; border-left: 4px solid var(--accent); padding-left: 8px; }
+        #saveStatus { font-size: 0.65rem; color: var(--save-color); font-weight: bold; margin-left: 10px; }
         #currentDate { font-size: 0.75rem; color: #4b5563; font-weight: 600; }
         
-        /* စာသားရှည်ရင် ဘေးကို Scroll ဆွဲကြည့်နိုင်ရန် Wrapper */
-        .table-wrapper { border-radius: 8px; border: 1px solid var(--border-color); background: white; overflow-x: auto; }
-        
-        /* table-layout: auto က စာသားအပြည့်အစုံမြင်ရအောင် အကွက်ကို ချဲ့ပေးပါတယ် */
+        .table-wrapper { border-radius: 8px; border: 1px solid var(--border-color); background: white; overflow-x: auto; position: relative; }
         table { width: 100%; border-collapse: collapse; table-layout: auto; }
         
-        thead th { 
-            background-color: var(--primary); color: #f3f4f6; text-align: left; 
-            padding: 12px 10px; font-size: 0.8rem; font-weight: 600;
-            border-right: 1px solid #374151; white-space: nowrap;
-        }
+        thead th { background-color: var(--primary); color: #ffffff; text-align: left; padding: 12px 10px; font-size: 0.8rem; font-weight: 600; border-right: 1px solid #374151; white-space: nowrap; cursor: pointer; }
+        thead th:hover { background-color: #374151; }
 
-        td { 
-            border: 1px solid var(--border-color); padding: 12px 10px; 
-            color: #111827; font-size: 0.85rem; outline: none;
-            font-weight: 700; 
-            white-space: nowrap; /* စာသားကို တစ်တန်းတည်းထားသည် */
-        }
-
-        /* အကွက်များ ဖုံးမနေစေရန် အနည်းဆုံး အကျယ်များ သတ်မှတ်ခြင်း */
-        .no-col { width: 30px; text-align: center; }
-        .line-col { min-width: 30px; text-align: center; }
-        .item-col { min-width: 200px; } 
-        .location-col { min-width: 150px; }
-
-        td:focus { background-color: #f8fafc; box-shadow: inset 0 0 0 1.5px var(--accent); }
-        tbody tr:nth-child(even) { background-color: #fcfdfe; }
+        td { border: 1px solid var(--border-color); padding: 12px 10px; color: #000000 !important; font-size: 0.85rem; outline: none; font-weight: 700; white-space: nowrap; background-color: #ffffff; }
+        .no-col { width: 50px; text-align: center; }
+        tbody tr:nth-child(even) td { background-color: #f9fafb; }
+        td:focus { background-color: #f0f7ff !important; box-shadow: inset 0 0 0 1.5px var(--accent); }
 
         .controls { display: flex; gap: 8px; margin-top: 15px; padding: 0 5px; }
         .btn { flex: 1; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.8rem; color: white; }
         .add-btn { background-color: var(--accent); }
         .png-btn { background-color: var(--success); }
+        .clear-btn { background-color: #6b7280; max-width: 100px; }
 
-        .popup-menu { position: absolute; background: white; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1000; display: none; border-radius: 8px; width: 200px; max-height: 250px; overflow-y: auto; }
+        .popup-menu { position: absolute; background: white; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1000; display: none; border-radius: 8px; width: 220px; max-height: 250px; overflow-y: auto; }
         .menu-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; font-size: 0.85rem; font-weight: 600; color: #1f2937; }
         .menu-item:hover { background-color: #ebf5ff; }
+        .filter-header { padding: 8px 12px; background: #f3f4f6; font-size: 0.7rem; color: #6b7280; border-bottom: 1px solid var(--border-color); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="captureArea" class="container">
     <div class="header-section">
-        <h2>CWH Database</h2>
+        <div><h2>CWH Database <span id="saveStatus"></span></h2></div>
         <div id="currentDate"></div>
     </div>
 
@@ -70,10 +51,10 @@
         <table id="mainTable">
             <thead>
                 <tr>
-                    <th class="no-col">No</th>
-                    <th class="line-col" onclick="showFilter(1, event)">Line ▼</th>
-                    <th class="item-col" onclick="showFilter(2, event)">Item ▼</th>
-                    <th class="location-col">Location</th>
+                    <th class="no-col" onclick="showAllRows()">No </th>
+                    <th style="min-width:60px" onclick="showFilter(1, event)">Line ▼</th>
+                    <th style="min-width:200px" onclick="showFilter(2, event)">Item ▼</th>
+                    <th style="min-width:150px">Location</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -88,59 +69,90 @@
 </div>
 
 <script>
-    const d = new Date();
-    document.getElementById('currentDate').innerText = "Date: " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
-
     const bulkItems = "MB Qt Ctn,MB Qt Crt,Promo MB Qt Ctn,Promo MB Qt Crt,MB Can 500ml,MB Can 330ml,MB Lager Pint Ctn,MB Lager Pint Crt,Mpre Pint Ctn,Mpre Pint Crt,Mpre Can 330ml,MS Can 330ml,BS Can 330ml,BS Qt Ctn,BS Qt Crt,Promo BS Qt Crt,Promo BS Qt Ctn,AG 6.5% Can 330ml,AG 6.5% Can 500ml,Promo AG 6.5% Can 500ml,AG 5% Can 500ml,AG 5% Can 330ml,AG 8.1% Can 500ml,Keen Can 500ml,Keen Can 330ml,MB 30L,Mpre 10L,Mpre 30L,BS 10L,BS 30L,AG6.5% 30L,AG 5% 30L,Keen 10L,Keen 30L,Promo Keen 500ml";
-    
     const itemsArray = bulkItems.split(",").map(item => item.trim());
     const tbody = document.getElementById('tableBody');
     const popup = document.getElementById('customPopup');
+    const saveStatus = document.getElementById('saveStatus');
 
-    for (let i = 1; i <= 20; i++) createRow(i);
+    window.onload = () => {
+        const d = new Date();
+        document.getElementById('currentDate').innerText = "Date: " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+        const savedData = localStorage.getItem('cwh_filter_v1');
+        const now = new Date().getTime();
 
-    function createRow(no) {
-        const row = tbody.insertRow();
-        row.innerHTML = `<td class="no-col" contenteditable="true">${no}</td><td class="line-col" contenteditable="true"></td><td class="item-col" contenteditable="true" oninput="handleItemInput(this)"></td><td class="location-col" contenteditable="true"></td>`;
-    }
-
-    function addFiveRows() {
-        for (let i = 0; i < 5; i++) {
-            const lastNo = parseInt(tbody.rows[tbody.rows.length-1]?.cells[0].innerText) || 0;
-            createRow(lastNo + 1);
+        if (savedData) {
+            const parsed = JSON.parse(savedData);
+            if (now - parsed.timestamp > 24 * 60 * 60 * 1000) {
+                initTable(20);
+            } else {
+                parsed.tableData.forEach(d => createRow(d.no, d.line, d.item, d.loc));
+            }
+        } else {
+            initTable(20);
         }
+    };
+
+    function initTable(count) {
+        tbody.innerHTML = '';
+        for (let i = 1; i <= count; i++) createRow(i);
     }
 
+    function createRow(no, line = '', item = '', loc = '') {
+        const row = tbody.insertRow();
+        row.innerHTML = `<td class="no-col" contenteditable="true">${no}</td><td contenteditable="true">${line}</td><td contenteditable="true" oninput="handleItemInput(this)">${item}</td><td contenteditable="true">${loc}</td>`;
+    }
+
+    // Filter Function
     function showFilter(colIndex, event) {
         event.stopPropagation();
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const rows = Array.from(tbody.rows);
         const uniqueValues = [...new Set(rows.map(r => r.cells[colIndex].innerText.trim()))].filter(v => v !== "");
-        popup.innerHTML = '';
+        
+        if (uniqueValues.length === 0) return;
+
+        popup.innerHTML = '<div class="filter-header">Filter by:</div>';
         uniqueValues.forEach(val => {
             const div = document.createElement('div');
-            div.className = 'menu-item'; div.innerText = val;
+            div.className = 'menu-item';
+            div.innerText = val;
             div.onclick = () => {
                 rows.forEach(r => r.style.display = r.cells[colIndex].innerText.trim() === val ? "" : "none");
                 popup.style.display = 'none';
             };
             popup.appendChild(div);
         });
+
         const rect = event.currentTarget.getBoundingClientRect();
         popup.style.left = rect.left + 'px';
         popup.style.top = (rect.bottom + window.scrollY) + 'px';
         popup.style.display = 'block';
     }
 
+    function showAllRows() {
+        Array.from(tbody.rows).forEach(r => r.style.display = "");
+    }
+
+    // Auto-save & Item Input
+    function autoSave() {
+        const rows = Array.from(tbody.rows);
+        const data = rows.map(r => ({ no: r.cells[0].innerText, line: r.cells[1].innerText, item: r.cells[2].innerText, loc: r.cells[3].innerText }));
+        localStorage.setItem('cwh_filter_v1', JSON.stringify({ timestamp: new Date().getTime(), tableData: data }));
+        saveStatus.innerText = "● Saved " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        setTimeout(() => saveStatus.innerText = "", 2000);
+    }
+    setInterval(autoSave, 5000);
+
     function handleItemInput(cell) {
         const val = cell.innerText.trim().toLowerCase();
         if (!val) { popup.style.display='none'; return; }
         const matches = itemsArray.filter(i => i.toLowerCase().includes(val));
         if (matches.length > 0) {
-            popup.innerHTML = '';
+            popup.innerHTML = '<div class="filter-header">Suggestions:</div>';
             matches.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'menu-item'; div.innerText = m;
-                div.onclick = () => { cell.innerText = m; popup.style.display='none'; };
+                div.onclick = () => { cell.innerText = m; popup.style.display='none'; autoSave(); };
                 popup.appendChild(div);
             });
             const rect = cell.getBoundingClientRect();
@@ -150,23 +162,26 @@
         } else popup.style.display='none';
     }
 
+    function addFiveRows() {
+        const currentCount = tbody.rows.length;
+        for (let i = 1; i <= 5; i++) createRow(currentCount + i);
+        autoSave();
+    }
+
     function downloadPNG() {
         const rows = Array.from(tbody.rows);
-        const originalDisplays = rows.map(r => r.style.display);
-        rows.forEach(row => {
-            const hasData = row.cells[1].innerText.trim() !== "" || row.cells[2].innerText.trim() !== "" || row.cells[3].innerText.trim() !== "";
-            if (!hasData) row.style.display = 'none';
-        });
-        html2canvas(document.getElementById("captureArea"), { scale: 3, scrollX: 0, scrollY: -window.scrollY, useCORS: true }).then(canvas => {
+        const original = rows.map(r => r.style.display);
+        rows.forEach(r => { if (r.cells[1].innerText.trim() === "" && r.cells[2].innerText.trim() === "") r.style.display = 'none'; });
+        html2canvas(document.getElementById("captureArea"), { scale: 3 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `CWH_Report.png`;
-            link.href = canvas.toDataURL("image/png");
+            link.download = `CWH_${new Date().getTime()}.png`;
+            link.href = canvas.toDataURL();
             link.click();
-            rows.forEach((row, i) => row.style.display = originalDisplays[i]);
+            rows.forEach((r, i) => r.style.display = original[i]);
         });
     }
+
     document.addEventListener('click', () => popup.style.display = 'none');
 </script>
-
 </body>
 </html>
