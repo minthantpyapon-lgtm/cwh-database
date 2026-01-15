@@ -172,7 +172,7 @@
         const rows = Array.from(tbody.rows);
         const original = rows.map(r => r.style.display);
         rows.forEach(r => { if (r.cells[1].innerText.trim() === "" && r.cells[2].innerText.trim() === "") r.style.display = 'none'; });
-        html2canvas(document.getElementById("captureArea"), { scale: 3 }).then(canvas => {
+        html2canvas(document.getElementById("captureArea"), { scale: 4 }).then(canvas => {
             const link = document.createElement('a');
             link.download = `CWH_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL();
