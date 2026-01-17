@@ -6,7 +6,7 @@
     <title>CWH Database - Filter Included</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #1f2937; --accent: #2563eb; --bg: #f3f4f6; --border-color: #d1d5db; --success: #db2777; --save-color: #059669; }
+        :root { --primary: #1f2937; --accent: #2563eb; --bg: #f3f4f6; --border-color: #d1d5db; --success: #db2777; --save-color: #059669; --danger: #dc2626; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 5px; }
         
@@ -27,11 +27,11 @@
         tbody tr:nth-child(even) td { background-color: #f9fafb; }
         td:focus { background-color: #f0f7ff !important; box-shadow: inset 0 0 0 1.5px var(--accent); }
 
-        .controls { display: flex; gap: 8px; margin-top: 15px; padding: 0 5px; }
-        .btn { flex: 1; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.8rem; color: white; }
+        .controls { display: flex; gap: 8px; margin-top: 15px; padding: 0 5px; flex-wrap: wrap; }
+        .btn { flex: 1; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.8rem; color: white; min-width: 120px; }
         .add-btn { background-color: var(--accent); }
         .png-btn { background-color: var(--success); }
-        .clear-btn { background-color: #6b7280; max-width: 100px; }
+        .clear-btn { background-color: var(--danger); }
 
         .popup-menu { position: absolute; background: white; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1000; display: none; border-radius: 8px; width: 220px; max-height: 250px; overflow-y: auto; }
         .menu-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; font-size: 0.85rem; font-weight: 600; color: #1f2937; }
@@ -65,6 +65,7 @@
     <div class="controls" data-html2canvas-ignore>
         <button class="btn add-btn" onclick="addFiveRows()">+ Add 5 Rows</button>
         <button class="btn png-btn" onclick="downloadPNG()">📸 Save PNG</button>
+        <button class="btn clear-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
     </div>
 </div>
 
@@ -78,8 +79,13 @@
     window.onload = () => {
         const d = new Date();
         document.getElementById('currentDate').innerText = "Date: " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+        loadTable();
+    };
+
+    function loadTable() {
         const savedData = localStorage.getItem('cwh_filter_v1');
         const now = new Date().getTime();
+        tbody.innerHTML = '';
 
         if (savedData) {
             const parsed = JSON.parse(savedData);
@@ -91,7 +97,7 @@
         } else {
             initTable(20);
         }
-    };
+    }
 
     function initTable(count) {
         tbody.innerHTML = '';
@@ -103,7 +109,6 @@
         row.innerHTML = `<td class="no-col" contenteditable="true">${no}</td><td contenteditable="true">${line}</td><td contenteditable="true" oninput="handleItemInput(this)">${item}</td><td contenteditable="true">${loc}</td>`;
     }
 
-    // Filter Function
     function showFilter(colIndex, event) {
         event.stopPropagation();
         const rows = Array.from(tbody.rows);
@@ -133,7 +138,6 @@
         Array.from(tbody.rows).forEach(r => r.style.display = "");
     }
 
-    // Auto-save & Item Input
     function autoSave() {
         const rows = Array.from(tbody.rows);
         const data = rows.map(r => ({ no: r.cells[0].innerText, line: r.cells[1].innerText, item: r.cells[2].innerText, loc: r.cells[3].innerText }));
@@ -166,6 +170,15 @@
         const currentCount = tbody.rows.length;
         for (let i = 1; i <= 5; i++) createRow(currentCount + i);
         autoSave();
+    }
+
+    function clearAllData() {
+        if (confirm("Are you sure you want to delete all data ?")) {
+            localStorage.removeItem('cwh_filter_v1');
+            initTable(20);
+            saveStatus.innerText = "● Cleared";
+            setTimeout(() => saveStatus.innerText = "", 2000);
+        }
     }
 
     function downloadPNG() {
